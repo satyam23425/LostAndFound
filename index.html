@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reclaim — Lost & Found Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c14;
+    --surface: #111420;
+    --surface2: #181c2e;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.13);
+    --text: #f0f2ff;
+    --text-muted: #7a82a8;
+    --text-faint: #3d4466;
+    --accent: #4f6ef7;
+    --accent-glow: rgba(79,110,247,0.3);
+    --accent2: #8b5cf6;
+    --accent-soft: rgba(79,110,247,0.1);
+    --found: #10b981;
+    --found-soft: rgba(16,185,129,0.12);
+    --lost: #f59e0b;
+    --lost-soft: rgba(245,158,11,0.12);
+    --danger: #ef4444;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
+    --glass: rgba(17,20,32,0.7);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+  [data-theme="light"] {
+    --bg: #f4f6ff;
+    --surface: #ffffff;
+    --surface2: #eef1ff;
+    --border: rgba(79,110,247,0.1);
+    --border-strong: rgba(79,110,247,0.2);
+    --text: #0d1033;
+    --text-muted: #5c6899;
+    --text-faint: #b4bce8;
+    --accent: #3b5ef0;
+    --accent-glow: rgba(59,94,240,0.2);
+    --accent2: #7c3aed;
+    --accent-soft: rgba(59,94,240,0.08);
+    --found: #059669;
+    --found-soft: rgba(5,150,105,0.1);
+    --lost: #d97706;
+    --lost-soft: rgba(217,119,6,0.1);
+    --danger: #dc2626;
+    --card-shadow: 0 4px 24px rgba(59,94,240,0.08), 0 1px 4px rgba(0,0,0,0.06);
+    --glass: rgba(255,255,255,0.8);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+    transition: background 0.35s, color 0.35s;
+    overflow-x: hidden;
+  }
+
+  /* BG TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 60% 50% at 10% 0%, rgba(79,110,247,0.09) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 90% 100%, rgba(139,92,246,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; }
+
+  /* ─── HEADER ──────────────────────────────────── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 68px;
+    display: flex; align-items: center; gap: 1.5rem;
+    transition: background 0.35s;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.35rem;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+  .logo span { color: var(--accent); }
+
+  /* SEARCH BAR */
+  .search-wrap {
+    flex: 1; max-width: 480px; margin: 0 auto;
+    position: relative;
+  }
+  .search-bar {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-strong);
+    border-radius: 50px;
+    padding: 9px 18px 9px 44px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.25s;
+    backdrop-filter: blur(8px);
+  }
+  [data-theme="light"] .search-bar { background: rgba(79,110,247,0.06); }
+  .search-bar::placeholder { color: var(--text-muted); }
+  .search-bar:focus {
+    border-color: var(--accent);
+    background: rgba(79,110,247,0.08);
+    box-shadow: 0 0 0 4px var(--accent-glow);
+  }
+  .search-icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); font-size: 16px; pointer-events: none;
+  }
+
+  .header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500; font-size: 13.5px;
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: none; cursor: pointer;
+    transition: all 0.2s; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    box-shadow: 0 4px 14px var(--accent-glow);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+
+  /* THEME TOGGLE */
+  .theme-toggle {
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── HERO ───────────────────────────────────── */
+  .hero {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 3rem; align-items: center;
+    padding: 5rem 3rem 4rem;
+    max-width: 1280px; margin: 0 auto;
+  }
+
+  .hero-left h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.2rem;
+  }
+  .hero-left h1 .gradient-text {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-left p {
+    color: var(--text-muted);
+    font-size: 1.05rem; line-height: 1.7;
+    max-width: 440px; margin-bottom: 2rem;
+  }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-lg { padding: 13px 28px; font-size: 15px; }
+
+  /* STATS ROW */
+  .hero-stats {
+    display: flex; gap: 2rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .stat-item {}
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.6rem;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-label { font-size: 12.5px; color: var(--text-muted); }
+
+  /* QUOTE SLIDER */
+  .quote-slider {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    box-shadow: var(--card-shadow);
+    position: relative; overflow: hidden;
+    min-height: 280px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .quote-slider::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(79,110,247,0.05) 0%, rgba(139,92,246,0.05) 100%);
+  }
+  .quote-bg-glyph {
+    position: absolute; top: -20px; right: -20px;
+    font-size: 160px; opacity: 0.03;
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    line-height: 1; user-select: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .quote-content { position: relative; z-index: 1; }
+  .quote-icon { font-size: 2rem; margin-bottom: 1rem; opacity: 0.6; }
+  .quote-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem; font-weight: 600;
+    line-height: 1.45; color: var(--text);
+    min-height: 80px;
+  }
+  .quote-author {
+    font-size: 13px; color: var(--text-muted);
+    margin-top: 1rem; font-style: italic;
+  }
+  .slider-dots {
+    display: flex; gap: 8px; align-items: center;
+    position: relative; z-index: 1;
+    margin-top: 1.5rem;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%; border: none;
+    background: var(--border-strong); cursor: pointer;
+    transition: all 0.3s;
+  }
+  .dot.active { background: var(--accent); width: 22px; border-radius: 4px; }
+  .slider-nav {
+    display: flex; gap: 8px; margin-left: auto;
+  }
+  .slider-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%; border: 1px solid var(--border-strong);
+    background: var(--surface2); color: var(--text-muted);
+    cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .slider-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── SECTION HEADER ─────────────────────────── */
+  .section { max-width: 1280px; margin: 0 auto; padding: 2rem 3rem 4rem; }
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.5rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .live-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px; font-weight: 500;
+    background: rgba(16,185,129,0.15);
+    color: var(--found);
+    padding: 3px 9px; border-radius: 20px;
+    border: 1px solid rgba(16,185,129,0.25);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--found);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+  .filter-tabs { display: flex; gap: 8px; }
+  .tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    padding: 7px 16px; border-radius: 50px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text-muted); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab.active, .tab:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  /* ─── ITEM GRID ───────────────────────────────── */
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .item-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    cursor: pointer;
+    position: relative;
+  }
+  .item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.15);
+    border-color: var(--border-strong);
+  }
+  [data-theme="light"] .item-card:hover {
+    box-shadow: 0 12px 36px rgba(59,94,240,0.12), 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .card-image {
+    width: 100%; height: 190px; object-fit: cover;
+    display: block; position: relative;
+    background: var(--surface2);
+    overflow: hidden;
+  }
+  .card-image-inner {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem;
+    position: relative;
+  }
+  .card-image-inner::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: 0.12;
+  }
+  .img-lost::before { background: linear-gradient(135deg, var(--lost), transparent); }
+  .img-found::before { background: linear-gradient(135deg, var(--found), transparent); }
+
+  .card-type-badge {
+    position: absolute; top: 12px; left: 12px;
+    font-size: 11.5px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    padding: 4px 11px; border-radius: 20px;
+    backdrop-filter: blur(8px); z-index: 2;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge-lost {
+    background: rgba(245,158,11,0.18);
+    color: var(--lost);
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+  .badge-found {
+    background: rgba(16,185,129,0.18);
+    color: var(--found);
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+
+  .verified-badge {
+    position: absolute; top: 12px; right: 12px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #fff;
+    box-shadow: 0 2px 8px var(--accent-glow);
+    z-index: 2;
+  }
+
+  .card-body { padding: 1.1rem; }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1rem;
+    margin-bottom: 0.4rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-desc {
+    font-size: 13px; color: var(--text-muted);
+    line-height: 1.5; margin-bottom: 0.9rem;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .tag {
+    font-size: 11.5px; font-weight: 500;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 3px 10px; border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
+    gap: 8px;
+  }
+  .card-meta { font-size: 12px; color: var(--text-muted); }
+  .btn-card {
+    font-size: 12.5px; padding: 7px 14px;
+    border-radius: 10px; font-weight: 600;
+    border: none; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-claim {
+    background: var(--found-soft);
+    color: var(--found);
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+  .btn-claim:hover { background: var(--found); color: #fff; }
+  .btn-contact {
+    background: var(--lost-soft);
+    color: var(--lost);
+    border: 1px solid rgba(245,158,11,0.2);
+  }
+  .btn-contact:hover { background: var(--lost); color: #fff; }
+
+  /* ─── FORM SECTION ───────────────────────────── */
+  .form-section {
+    max-width: 1280px; margin: 0 auto;
+    padding: 0 3rem 5rem;
+  }
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+  }
+  .form-header {
+    padding: 2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, rgba(79,110,247,0.05) 0%, rgba(139,92,246,0.05) 100%);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .form-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.3rem;
+  }
+
+  /* STEPS */
+  .steps-indicator {
+    display: flex; align-items: center; gap: 0;
+  }
+  .step-item {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
+  }
+  .step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    border: 2px solid var(--border-strong); color: var(--text-muted);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .step-item.active .step-num {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .step-item.done .step-num {
+    background: var(--found); border-color: var(--found); color: #fff;
+  }
+  .step-label { font-size: 12.5px; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
+  .step-item.active .step-label { color: var(--text); }
+  .step-line {
+    width: 40px; height: 1px;
+    background: var(--border-strong); margin: 0 4px;
+  }
+
+  .form-body { padding: 2.5rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .form-full { grid-column: 1 / -1; }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 13px; font-weight: 500; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .required-star { color: var(--danger); }
+  .field-input, .field-select, .field-textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
+    transition: all 0.2s;
+    appearance: none;
+  }
+  .field-input::placeholder { color: var(--text-faint); }
+  .field-input:focus, .field-select:focus, .field-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    background: var(--surface);
+  }
+  .field-textarea { resize: vertical; min-height: 90px; }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 2rem; text-align: center;
+    background: var(--surface2);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .upload-icon { font-size: 2.2rem; margin-bottom: 0.6rem; opacity: 0.7; }
+  .upload-text { font-size: 14px; color: var(--text-muted); }
+  .upload-hint { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+
+  /* GEO BLOCK */
+  .geo-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.2rem;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .geo-icon {
+    width: 42px; height: 42px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+  .geo-info { flex: 1; }
+  .geo-info strong { display: block; font-size: 14px; margin-bottom: 2px; }
+  .geo-info span { font-size: 12.5px; color: var(--text-muted); }
+
+  /* TYPE SELECTOR */
+  .type-selector { display: flex; gap: 10px; }
+  .type-option {
+    flex: 1; padding: 14px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: center; cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+  }
+  .type-option.selected-lost {
+    border-color: var(--lost);
+    background: var(--lost-soft);
+  }
+  .type-option.selected-found {
+    border-color: var(--found);
+    background: var(--found-soft);
+  }
+  .type-emoji { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+  .type-label { font-size: 14px; font-weight: 600; }
+
+  .form-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem 2.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .step-progress-bar {
+    flex: 1; height: 4px;
+    background: var(--border);
+    border-radius: 2px; overflow: hidden;
+    margin: 0 1.5rem;
+  }
+  .step-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 33%;
+  }
+
+  /* ─── MODAL ───────────────────────────────────── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    max-width: 460px; width: 90%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    transform: scale(0.93) translateY(16px);
+    transition: transform 0.3s;
+  }
+  .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 1.3rem;
+    margin-bottom: 0.4rem;
+  }
+  .modal-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 1.8rem; }
+  .modal-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 1.8rem; }
+  .modal-footer { display: flex; gap: 10px; }
+  .modal-close {
+    position: absolute; top: 0; right: 0;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: none; background: transparent;
+    font-size: 18px; color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0.5rem;
+  }
+  .modal-close:hover { color: var(--text); background: var(--surface2); }
+
+  /* DIVIDER */
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 1rem 0; color: var(--text-faint); font-size: 13px;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed; bottom: 2rem; right: 2rem;
+    z-index: 999;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    font-size: 14px;
+    transform: translateX(120%);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 300px;
+  }
+  .toast.show { transform: translateX(0); }
+  .toast-icon { font-size: 18px; flex-shrink: 0; }
+  .toast-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+  .toast-text span { font-size: 12.5px; color: var(--text-muted); }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 2rem 3rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+  .anim-d1 { animation-delay: 0.1s; }
+  .anim-d2 { animation-delay: 0.2s; }
+  .anim-d3 { animation-delay: 0.3s; }
+  .anim-d4 { animation-delay: 0.4s; }
+
+  /* ─── RESPONSIVE ──────────────────────────────── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 1.5rem 2.5rem; }
+    .section { padding: 1.5rem 1.5rem 3rem; }
+    .form-section { padding: 0 1.5rem 4rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .steps-indicator { display: none; }
+    .hero-stats { gap: 1.2rem; }
+  }
+  @media (max-width: 600px) {
+    header { padding: 0 1rem; gap: 1rem; }
+    .header-actions .btn-ghost { display: none; }
+    .item-grid { grid-template-columns: 1fr; }
+    .form-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo">
+    <div class="logo-icon">🔍</div>
+    Re<span>claim</span>
+  </a>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔎</span>
+    <input class="search-bar" type="text" placeholder="Search by item, location, category…" id="searchInput">
+  </div>
+
+  <div class="header-actions">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</button>
+    <button class="btn btn-ghost" onclick="openModal()">Log In</button>
+    <button class="btn btn-primary">Sign Up →</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <h1 class="anim anim-d1">
+      Find What's<br>
+      <span class="gradient-text">Lost. Return</span><br>
+      What's Found.
+    </h1>
+    <p class="anim anim-d2">A trusted, community-driven platform where every recovered item tells a story of honesty and integrity. Real-time. Verified. Secure.</p>
+    <div class="hero-cta anim anim-d3">
+      <button class="btn btn-primary btn-lg" onclick="scrollToForm()">📦 Report an Item</button>
+      <button class="btn btn-ghost btn-lg">Browse Feed ↓</button>
+    </div>
+    <div class="hero-stats anim anim-d4">
+      <div class="stat-item">
+        <span class="stat-num" id="countItems">2,847</span>
+        <span class="stat-label">Items Listed</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">1,293</span>
+        <span class="stat-label">Items Reunited</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">98%</span>
+        <span class="stat-label">Satisfaction Rate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUOTE SLIDER -->
+  <div class="quote-slider anim anim-d2">
+    <div class="quote-bg-glyph">"</div>
+    <div class="quote-content">
+      <div class="quote-icon">💬</div>
+      <p class="quote-text" id="quoteText">Bringing honesty back to the community, one recovered item at a time.</p>
+      <p class="quote-author" id="quoteAuthor">— Reclaim Community Pledge</p>
+    </div>
+    <div class="slider-dots" id="sliderDots">
+      <button class="dot active" onclick="goToSlide(0)"></button>
+      <button class="dot" onclick="goToSlide(1)"></button>
+      <button class="dot" onclick="goToSlide(2)"></button>
+      <button class="dot" onclick="goToSlide(3)"></button>
+      <div class="slider-nav">
+        <button class="slider-btn" onclick="prevSlide()">←</button>
+        <button class="slider-btn" onclick="nextSlide()">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN FEED -->
+<section class="section" id="feed">
+  <div class="section-head">
+    <div class="section-title">
+      Live Feed
+      <span class="live-badge"><span class="live-dot"></span> Real-time</span>
+    </div>
+    <div class="filter-tabs">
+      <button class="tab active" onclick="filterCards('all', this)">All</button>
+      <button class="tab" onclick="filterCards('lost', this)">🔴 Lost</button>
+      <button class="tab" onclick="filterCards('found', this)">🟢 Found</button>
+    </div>
+  </div>
+
+  <div class="item-grid" id="itemGrid">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<!-- REPORT FORM -->
+<section class="form-section" id="reportForm">
+  <div class="form-card">
+    <div class="form-header">
+      <div>
+        <div class="form-title">📋 Report an Item</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Help the community — fill in the details below</div>
+      </div>
+      <div class="steps-indicator">
+        <div class="step-item done" id="step1-ind" onclick="goStep(1)">
+          <div class="step-num">✓</div>
+          <div class="step-label">Identity</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item active" id="step2-ind" onclick="goStep(2)">
+          <div class="step-num">2</div>
+          <div class="step-label">Item Details</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item" id="step3-ind" onclick="goStep(3)">
+          <div class="step-num">3</div>
+          <div class="step-label">Location & Media</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: IDENTITY -->
+    <div class="form-body" id="formStep1">
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label">👤 Full Name <span class="required-star">*</span></label>
+          <input class="field-input" type="text" placeholder="e.g. Arjun Sharma">
+        </div>
+        <div class="field-group">
+          <label class="field-label">📧 Email Address <span class="required-star">*</span></label>
+          <input class="field-input" type="email" placeholder="your@email.com">
+        </div>
+        <div class="field-group">
+          <label class="field-label">📱 Phone Number</label>
+          <input class="field-input" type="tel" placeholder="+91 98765 43210">
+        </div>
+        <div class="field-group">
+          <label class="field-label">🪪 ID Verification Type <span class="required-star">*</span></label>
+          <select class="field-select">
+            <option value="">Select ID Type…</option>
+            <option>Aadhaar Card</option>
+            <option>Student ID</option>
+            <option>Driver's License</option>
+            <option>Passport</option>
+          </select>
+        </div>
+        <div class="field-group form-full">
+          <label class="field-label">🆔 Upload ID Document <span class="required-star">*</span></label>
+          <div class="upload-zone" onclick="showToast('📎', 'File Selected', 'ID document attached successfully.')">
+            <div class="upload-icon">🪪</div>
+            <div class="upload-text">Drag & drop or click to upload your ID</div>
+            <div class="upload-hint">JPG, PNG, PDF — max 5MB · Encrypted &amp; Secure</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: ITEM DETAILS (hidden by default, shown on step nav) -->
+    <div class="form-body" id="formStep2" style="display:none">
+      <div class="form-grid">
+        <div class="field-group form-full">
+          <label class="field-label">Item Type <span class="required-star">*</span></label>
+          <div class="type-selector">
+            <div class="type-option" id="typeLost" onclick="selectType('lost')">
+              <span class="type-emoji">😟</span>
+              <div class="type-label" style="color:var(--lost)">I Lost It</div>
+            </div>
+            <div class="type-option selected-found" id="typeFound" onclick="selectType('found')">
+              <span class="type-emoji">🎉</span>
+              <div class="type-label" style="color:var(--found)">I Found It</div>
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">📦 Item Name <span class="required-star">*</span></label>
+          <input class="field-input" type="text" placeholder="e.g. Blue Leather Wallet">
+        </div>
+        <div class="field-group">
+          <label class="field-label">🏷️ Category <span class="required-star">*</span></label>
+          <select class="field-select">
+            <option value="">Select category…</option>
+            <option>Electronics</option>
+            <option>Wallet / Cards</option>
+            <option>Clothing</option>
+            <option>Jewellery</option>
+            <option>Keys</option>
+            <option>Bags</option>
+            <option>Pet</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field-group form-full">
+          <label class="field-label">📝 Description <span class="required-star">*</span></label>
+          <textarea class="field-textarea" placeholder="Describe the item in detail — color, brand, unique features, any identifiers…"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">📅 Date</label>
+          <input class="field-input" type="date">
+        </div>
+        <div class="field-group">
+          <label class="field-label">⏰ Approximate Time</label>
+          <input class="field-input" type="time">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: LOCATION & MEDIA -->
+    <div class="form-body" id="formStep3" style="display:none">
+      <div class="form-grid">
+        <div class="field-group form-full">
+          <label class="field-label">📸 Upload Item Photos</label>
+          <div class="upload-zone" onclick="showToast('🖼️', 'Photo Added', '3 photos uploaded successfully.')">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Add photos to help identify the item</div>
+            <div class="upload-hint">PNG, JPG · up to 10 images · max 20MB</div>
+          </div>
+        </div>
+        <div class="field-group form-full">
+          <label class="field-label">📍 Location <span class="required-star">*</span></label>
+          <div class="geo-block">
+            <div class="geo-icon">🗺️</div>
+            <div class="geo-info">
+              <strong>Geo-Tag Enabled</strong>
+              <span>Connaught Place, New Delhi — Pin auto-detected</span>
+            </div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="showToast('📍','Location Pinned','Your current location has been tagged.')">Re-pin</button>
+          </div>
+        </div>
+        <div class="field-group form-full">
+          <label class="field-label">📌 Landmark / Address Details</label>
+          <input class="field-input" type="text" placeholder="e.g. Near Gate 3, DLF Mall, Saket">
+        </div>
+        <div class="field-group form-full">
+          <label class="field-label">💬 Additional Notes</label>
+          <textarea class="field-textarea" placeholder="Any extra context for the finder or the owner…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-footer">
+      <button class="btn btn-ghost" id="backBtn" onclick="prevStep()" style="opacity:0.4;pointer-events:none">← Back</button>
+      <div class="step-progress-bar">
+        <div class="step-progress-fill" id="progressFill"></div>
+      </div>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Continue →</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Built with ❤️ for communities everywhere · <a href="#">Privacy</a> · <a href="#">Terms</a> · © 2025 Reclaim
+</footer>
+
+</div><!-- /wrapper -->
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="closeModalOutside(event)">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Welcome Back 👋</div>
+    <div class="modal-sub">Log in to your Reclaim account to post or claim items.</div>
+    <div class="modal-fields">
+      <div class="field-group">
+        <label class="field-label">Email Address</label>
+        <input class="field-input" type="email" placeholder="you@example.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <input class="field-input" type="password" placeholder="••••••••">
+      </div>
+    </div>
+    <div class="modal-footer" style="flex-direction:column;gap:10px">
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('✅','Logged In','Welcome back to Reclaim!');closeModal()">Log In</button>
+      <div class="divider">or</div>
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:14px">🔵 Continue with Google</button>
+    </div>
+    <p style="text-align:center;font-size:12.5px;color:var(--text-muted);margin-top:1rem">
+      Don't have an account? <a href="#" style="color:var(--accent)">Sign up free</a>
+    </p>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ─── THEME ──────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn  = document.getElementById('themeBtn');
+  if (html.dataset.theme === 'dark') {
+    html.dataset.theme = 'light';
+    btn.textContent = '☀️';
+  } else {
+    html.dataset.theme = 'dark';
+    btn.textContent = '🌙';
+  }
+}
+
+// ─── QUOTES ─────────────────────────────────────
+const quotes = [
+  { text: "Bringing honesty back to the community, one recovered item at a time.", author: "— Reclaim Community Pledge" },
+  { text: "What was lost is now just a click away from being found by the right hands.", author: "— Our Mission" },
+  { text: "A platform built on trust, integrity, and the belief in human kindness.", author: "— Reclaim Founders" },
+  { text: "Every returned item is proof that good people still walk among us.", author: "— Community Stories" },
+];
+let currentSlide = 0, slideTimer;
+
+function goToSlide(i) {
+  currentSlide = i;
+  const qt = document.getElementById('quoteText');
+  const qa = document.getElementById('quoteAuthor');
+  qt.style.opacity = '0'; qt.style.transform = 'translateY(8px)';
+  setTimeout(() => {
+    qt.textContent = quotes[i].text;
+    qa.textContent = quotes[i].author;
+    qt.style.transition = 'opacity 0.4s, transform 0.4s';
+    qt.style.opacity = '1'; qt.style.transform = 'translateY(0)';
+  }, 250);
+  document.querySelectorAll('.dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+  resetTimer();
+}
+
+function nextSlide() { goToSlide((currentSlide + 1) % quotes.length); }
+function prevSlide() { goToSlide((currentSlide - 1 + quotes.length) % quotes.length); }
+
+function resetTimer() {
+  clearInterval(slideTimer);
+  slideTimer = setInterval(nextSlide, 5000);
+}
+resetTimer();
+
+// ─── ITEM DATA ───────────────────────────────────
+const items = [
+  { type:'lost',  emoji:'🎒', bg:'#4f6ef7', title:'Navy Blue Backpack',       desc:'Lost near Connaught Place metro station. Contains laptop charger, notebooks, and personal items.',  cat:'Bags',        loc:'Connaught Place', date:'Mar 28', verified:true  },
+  { type:'found', emoji:'📱', bg:'#10b981', title:'iPhone 15 Pro (Black)',     desc:'Found at Lodi Garden near the fountain area. Screen intact, phone locked. Handed to security.',      cat:'Electronics', loc:'Lodi Garden',     date:'Mar 29', verified:true  },
+  { type:'lost',  emoji:'👛', bg:'#f59e0b', title:'Brown Leather Wallet',      desc:'Lost somewhere between Hauz Khas Village and Green Park. Contains cards and some cash.',            cat:'Wallet',      loc:'Hauz Khas',       date:'Mar 27', verified:false },
+  { type:'found', emoji:'🔑', bg:'#8b5cf6', title:'Car Keys (Honda City)',     desc:'Found at Saket Select Citywalk parking level B2. Has a distinctive Totoro keychain attached.',      cat:'Keys',        loc:'Saket',           date:'Mar 30', verified:true  },
+  { type:'lost',  emoji:'💍', bg:'#ef4444', title:'Gold Ring — Engraved',      desc:'Lost at Akshardham temple complex. Significant sentimental value. Reward offered for return.',     cat:'Jewellery',   loc:'Akshardham',      date:'Mar 26', verified:false },
+  { type:'found', emoji:'🎧', bg:'#06b6d4', title:'Sony WH-1000XM5 Headphones',desc:'Found on the Blue Line metro (towards Dwarka). Left in the overhead rack. Currently at the lost & found office.', cat:'Electronics', loc:'Blue Line Metro', date:'Mar 30', verified:true  },
+];
+
+function buildCard(item) {
+  const isFound = item.type === 'found';
+  return `
+    <div class="item-card" data-type="${item.type}">
+      <div class="card-image">
+        <div class="card-image-inner img-${item.type}" style="background:${item.bg}18">
+          <span style="position:relative;z-index:1">${item.emoji}</span>
+        </div>
+        <span class="card-type-badge badge-${item.type}">${item.type}</span>
+        ${item.verified ? '<span class="verified-badge" title="Verified User">✓</span>' : ''}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${item.title}</div>
+        <div class="card-desc">${item.desc}</div>
+        <div class="card-tags">
+          <span class="tag">📂 ${item.cat}</span>
+          <span class="tag">📍 ${item.loc}</span>
+          <span class="tag">🗓️ ${item.date}</span>
+        </div>
+        <div class="card-footer">
+          <div class="card-meta">${item.verified ? '✅ Verified User' : '👤 Unverified'}</div>
+          <button class="btn-card ${isFound ? 'btn-claim' : 'btn-contact'}"
+            onclick="handleAction(event, '${item.title}', ${isFound})">
+            ${isFound ? '✋ Claim' : '💬 Contact'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderCards(filter = 'all') {
+  const grid = document.getElementById('itemGrid');
+  const filtered = filter === 'all' ? items : items.filter(i => i.type === filter);
+  grid.innerHTML = filtered.map(buildCard).join('');
+}
+renderCards();
+
+function filterCards(type, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(type);
+}
+
+function handleAction(e, title, isFound) {
+  e.stopPropagation();
+  if (isFound) {
+    showToast('✋', 'Claim Submitted', `Your claim for "${title}" has been sent.`);
+  } else {
+    showToast('💬', 'Message Sent', `The finder of "${title}" has been contacted.`);
+  }
+}
+
+// ─── MULTI-STEP FORM ─────────────────────────────
+let currentStep = 1;
+const totalSteps = 3;
+
+function goStep(n) {
+  [1,2,3].forEach(s => {
+    document.getElementById(`formStep${s}`).style.display = s === n ? 'block' : 'none';
+  });
+  currentStep = n;
+  updateStepUI();
+}
+
+function nextStep() {
+  if (currentStep < totalSteps) goStep(currentStep + 1);
+  else {
+    showToast('🎉', 'Report Submitted!', 'Your item has been listed on the feed.');
+    goStep(1);
+  }
+}
+function prevStep() { if (currentStep > 1) goStep(currentStep - 1); }
+
+function updateStepUI() {
+  const fill = document.getElementById('progressFill');
+  const back = document.getElementById('backBtn');
+  const next = document.getElementById('nextBtn');
+
+  fill.style.width = `${(currentStep / totalSteps) * 100}%`;
+  back.style.opacity = currentStep === 1 ? '0.4' : '1';
+  back.style.pointerEvents = currentStep === 1 ? 'none' : 'all';
+  next.textContent = currentStep === totalSteps ? '🚀 Submit Report' : 'Continue →';
+
+  ['step1-ind','step2-ind','step3-ind'].forEach((id, idx) => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done');
+    if (idx + 1 < currentStep) el.classList.add('done');
+    else if (idx + 1 === currentStep) el.classList.add('active');
+  });
+}
+
+function selectType(type) {
+  document.getElementById('typeLost').className = 'type-option' + (type === 'lost' ? ' selected-lost' : '');
+  document.getElementById('typeFound').className = 'type-option' + (type === 'found' ? ' selected-found' : '');
+}
+
+function scrollToForm() {
+  document.getElementById('reportForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── MODAL ───────────────────────────────────────
+function openModal() { document.getElementById('authModal').classList.add('open'); }
+function closeModal() { document.getElementById('authModal').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target.id === 'authModal') closeModal(); }
+
+// ─── TOAST ───────────────────────────────────────
+function showToast(icon, title, sub) {
+  const tc = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="toast-icon">${icon}</div><div class="toast-text"><strong>${title}</strong><span>${sub}</span></div>`;
+  tc.appendChild(t);
+  requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 400);
+  }, 3500);
+}
+
+// ─── SEARCH FILTER ───────────────────────────────
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.item-card').forEach(card => {
+    const txt = card.innerText.toLowerCase();
+    card.style.display = txt.includes(q) ? '' : 'none';
+  });
+});
+
+// ─── LIVE COUNTER ANIMATION ──────────────────────
+let count = 2847;
+setInterval(() => {
+  if (Math.random() > 0.6) {
+    count += Math.floor(Math.random() * 2) + 1;
+    const el = document.getElementById('countItems');
+    if (el) el.textContent = count.toLocaleString();
+  }
+}, 4000);
+</script>
+</body>
+</html>
